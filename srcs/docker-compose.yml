@@ -23,6 +23,21 @@ services:
       - inception
     restart: unless-stopped
 
+  nginx:
+    build: ./requirements/nginx
+    container_name: nginx
+    volumes:
+      - wp_data:/var/www/wordpress
+    env_file:
+      - .env
+    depends_on:
+      - wordpress
+    ports:
+      - "443:443"
+    networks:
+      - inception
+    restart: unless-stopped
+
 networks:
   inception: {}
 

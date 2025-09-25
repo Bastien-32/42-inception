@@ -1,1 +1,19 @@
 FROM debian:bookworm-slim
+
+ENV DEBIAN_FRONTEND=noninteractive
+
+RUN apt-get update && apt-get install -y \
+	nginx \
+	openssl \
+	ca-certificates \
+ && rm -rf /var/lib/apt/lists/*
+
+RUN mkdir -p /etc/nginx/ssl /etc/nginx/templates /var/www/wordpress
+
+COPY conf/nginx.conf /etc/nginx/templates/nginx.conf.template
+
+COPY --chmod=755 tools/entrypoint.sh /tools/entrypoint.sh
+
+EXPOSE 443
+
+ENTRYPOINT ["/tools/entrypoint.sh"]
