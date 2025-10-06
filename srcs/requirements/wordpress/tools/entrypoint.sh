@@ -38,5 +38,14 @@ if ! wp core is-installed --path="$DOCROOT" --allow-root >/dev/null 2>&1; then
     --allow-root
 fi
 
-# 3) Démarrer PHP-FPM
+# 3) installer un autre Utilisateur
+if ! wp user get "$WP_USER_LOGIN" --path="$DOCROOT" --allow-root >/dev/null 2>&1; then
+  wp user create "$WP_USER_LOGIN" "$WP_USER_EMAIL" \
+	--path="$DOCROOT" \
+	--user_pass="$WP_USER_PASSWORD" \
+	--role=author \
+	--allow-root
+fi
+
+# 4) Démarrer PHP-FPM
 exec /usr/sbin/php-fpm8.2 -F

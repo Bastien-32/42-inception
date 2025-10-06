@@ -42,5 +42,15 @@ networks:
   inception: {}
 
 volumes:
-  mariadb_data: {}
-  wp_data: {}
+  mariadb_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/bastien/data/db
+  wp_data:
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/bastien/data/wp
