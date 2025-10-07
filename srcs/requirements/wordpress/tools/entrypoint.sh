@@ -47,5 +47,17 @@ if ! wp user get "$WP_USER_LOGIN" --path="$DOCROOT" --allow-root >/dev/null 2>&1
 	--allow-root
 fi
 
-# 4) Démarrer PHP-FPM
+# 4) Plugin Redis + activation du cache
+# (Active le plugin Redis et nettoie le cache proprement)
+wp --path="$DOCROOT" plugin install redis-cache --activate --allow-root || true
+wp --path="$DOCROOT" redis enable --allow-root || true
+
+# Purge le cache si la commande existe (flush-cache ou cache flush)
+if wp --path="$DOCROOT" help redis 2>/dev/null | grep -q 'flush-cache'; then
+  wp --path="$DOCROOT" redis flush-cache --allow-root || true
+else
+  wp --path="$DOCROOT" cache flush --allow-root || true
+fi
+
+# 5) Démarrer PHP-FPM
 exec /usr/sbin/php-fpm8.2 -F

@@ -6,6 +6,7 @@ RUN apt-get update && apt-get install -y \
     php-fpm \
     php-cli \
     php-mysql \
+	php-redis \
     mariadb-client \
     curl \
     ca-certificates \

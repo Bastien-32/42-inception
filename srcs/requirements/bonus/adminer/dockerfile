@@ -1,0 +1,12 @@
+FROM debian:bookworm
+
+RUN apt-get update -y \
+ && apt-get install -y php php-mysqli wget ca-certificates \
+ && mkdir -p /var/www/html \
+ && wget -O /var/www/html/index.php https://www.adminer.org/latest.php \
+ && chown -R www-data:www-data /var/www/html \
+ && rm -rf /var/lib/apt/lists/*
+
+EXPOSE 8080
+
+CMD ["php", "-S", "0.0.0.0:8080", "-t", "/var/www/html"]

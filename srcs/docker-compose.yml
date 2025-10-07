@@ -1,6 +1,8 @@
 services:
   mariadb:
-    build: ./requirements/mariadb
+    build:
+      context: ./requirements/mariadb
+    image: mariadb_custom
     container_name: mariadb
     volumes:
       - mariadb_data:/var/lib/mysql
@@ -10,21 +12,37 @@ services:
       - inception
     restart: unless-stopped
 
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=$MYSQL_ROOT_PASSWORD"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
   wordpress:
-    build: ./requirements/wordpress
+    build:
+      context: ./requirements/wordpress
+    image: wordpress_custom
     container_name: wordpress
     volumes:
       - wp_data:/var/www/wordpress
     env_file:
       - .env
     depends_on:
-      - mariadb
+      mariadb:
+        condition: service_healthy
+      redis:
+        condition: service_started
     networks:
       - inception
     restart: unless-stopped
+    environment:
+      - WP_REDIS_HOST=redis
+      - WP_REDIS_PORT=6379
 
   nginx:
-    build: ./requirements/nginx
+    build:
+      context: ./requirements/nginx
+    image: nginx_custom
     container_name: nginx
     volumes:
       - wp_data:/var/www/wordpress
@@ -32,14 +50,60 @@ services:
       - .env
     depends_on:
       - wordpress
+      - static_site
     ports:
       - "443:443"
     networks:
       - inception
     restart: unless-stopped
 
+  adminer:
+    build:
+      context: ./requirements/bonus/adminer
+    image: adminer_custom
+    container_name: adminer
+    env_file:
+      - .env
+    depends_on:
+      mariadb:
+        condition: service_healthy
+    ports:
+      - "8080:8080"
+    networks:
+      - inception
+    restart: unless-stopped
+    stop_signal: SIGINT
+
+  static_site:
+    build:
+      context: ./requirements/bonus/static_site
+    image: static_site_custom
+    container_name: static_site
+    restart: unless-stopped
+    networks:
+      - inception
+    volumes:
+      - ./requirements/bonus/static_site/website:/var/www/static:ro
+
+  redis:
+    build:
+      context: ./requirements/bonus/redis
+    image: redis_custom
+    container_name: redis
+    restart: unless-stopped
+    networks:
+      - inception
+    healthcheck:
+      test: ["CMD-SHELL", "redis-cli ping | grep -q PONG"]
+      interval: 5s
+      timeout: 3s
+      retries: 10
+
 networks:
-  inception: {}
+  inception:
+    name: srcs_inception
+    driver: bridge
+
 
 volumes:
   mariadb_data:

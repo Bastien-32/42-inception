@@ -1,0 +1,15 @@
+FROM debian:bookworm
+
+RUN apt-get update -y \
+ && apt-get install -y nginx ca-certificates \
+ && mkdir -p /var/www/static \
+ && rm -rf /var/lib/apt/lists/*
+
+COPY nginx.conf /etc/nginx/nginx.conf
+COPY website/ /var/www/static/
+
+RUN chown -R www-data:www-data /var/www/static
+
+EXPOSE 8081
+
+CMD ["nginx", "-g", "daemon off;"]
