@@ -1,22 +1,25 @@
 #!/bin/sh
 set -e
 
-: "${WP_DOMAIN_NAME:=localhost}"
+SSL_DIR=/etc/nginx/ssl
+TPL_IN=/etc/nginx/conf.d/default.conf.tpl
+CONF_OUT=/etc/nginx/conf.d/default.conf
 
-# Génération du certificat si absent
-if [ ! -f /etc/nginx/ssl/server.crt ] || [ ! -f /etc/nginx/ssl/server.key ]; then
-  echo "[nginx] Generating self-signed certificate for ${WP_DOMAIN_NAME}..."
+mkdir -p "$SSL_DIR"
+
+# Cert auto-signé si absent (SAN = WP_DOMAIN_NAME)
+if [ ! -f "$SSL_DIR/server.crt" ] || [ ! -f "$SSL_DIR/server.key" ]; then
+  echo "[nginx] Generating self-signed certificate for ${WP_DOMAIN_NAME}…"
   openssl req -x509 -nodes -days 365 -newkey rsa:2048 \
-    -keyout /etc/nginx/ssl/server.key \
-    -out /etc/nginx/ssl/server.crt \
-    -subj "/C=FR/ST=Occitanie/L=Perpignan/OU=42/O=42/CN=${WP_DOMAIN_NAME}"
-  chmod 600 /etc/nginx/ssl/server.key
+    -keyout "$SSL_DIR/server.key" \
+    -out    "$SSL_DIR/server.crt" \
+    -subj "/C=FR/ST=Occitanie/L=Perpignan/O=42/OU=42/CN=${WP_DOMAIN_NAME}" \
+    -addext "subjectAltName=DNS:${WP_DOMAIN_NAME}"
+  chmod 600 "$SSL_DIR/server.key"
 fi
 
-# Substituer la variable ${WP_DOMAIN_NAME} dans la conf
-sed "s|\${WP_DOMAIN_NAME}|${WP_DOMAIN_NAME}|g" \
-  /etc/nginx/templates/nginx.conf.template \
-  > /etc/nginx/conf.d/default.conf
+# Render conf depuis le template
+envsubst '${WP_DOMAIN_NAME}' < "$TPL_IN" > "$CONF_OUT"
 
-nginx -t   # tester la conf
+nginx -t
 exec nginx -g 'daemon off;'

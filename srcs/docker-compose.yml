@@ -123,7 +123,7 @@ services:
 
 networks:
   inception:
-    name: srcs_inception
+    name: inception
     driver: bridge
 
 
@@ -133,10 +133,10 @@ volumes:
     driver_opts:
       type: none
       o: bind
-      device: /home/bastien/data/db
+      device: /home/badal-la/data/mariadb
   wp_data:
     driver: local
     driver_opts:
       type: none
       o: bind
-      device: /home/bastien/data/wp
+      device: /home/badal-la/data/wp

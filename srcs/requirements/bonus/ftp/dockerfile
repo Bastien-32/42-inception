@@ -1,5 +1,4 @@
 FROM debian:bookworm-slim
-
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update \
@@ -7,12 +6,14 @@ RUN apt-get update \
  && echo "/usr/sbin/nologin" >> /etc/shells \
  && rm -rf /var/lib/apt/lists/*
 
-COPY conf/vsftpd.conf /tmp/vsftpd.conf
-# On ne substitue QUE l'IP passive
-RUN envsubst '${FTP_PASV_ADDRESS}' < /tmp/vsftpd.conf > /etc/vsftpd.conf
+# vsftpd a besoin de ce répertoire pour fonctionner
+RUN mkdir -p /var/run/vsftpd/empty
+
+# On copie un template de conf
+COPY conf/vsftpd.conf /etc/vsftpd.conf.tmpl
 
 COPY tools/entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh && mkdir -p /var/run/vsftpd/empty
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 21 40000-40005
 CMD ["/entrypoint.sh"]
