@@ -11,7 +11,6 @@ services:
     networks:
       - inception
     restart: unless-stopped
-
     healthcheck:
       test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=$MYSQL_ROOT_PASSWORD"]
       interval: 5s
@@ -121,6 +120,22 @@ services:
     networks:
       - inception
 
+  portainer:
+    build:
+      context: ./requirements/bonus/portainer
+    image: portainer_custom
+    container_name: portainer
+    restart: unless-stopped
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+      - portainer_data:/data
+    ports:
+      - "9000:9000"
+      - "9443:9443"
+      - "8000:8000"
+    networks:
+      - inception
+
 networks:
   inception:
     name: inception
@@ -129,14 +144,11 @@ networks:
 
 volumes:
   mariadb_data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /home/badal-la/data/mariadb
+    external: true
+    name: srcs_mariadb_data
   wp_data:
-    driver: local
-    driver_opts:
-      type: none
-      o: bind
-      device: /home/badal-la/data/wp
+    external: true
+    name: srcs_wp_data
+  portainer_data:
+    external: true
+    name: srcs_portainer_data
