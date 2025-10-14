@@ -12,8 +12,8 @@ EOF
 # Si le datadir du volume est vide, on l'initialise
 if [ ! -d /var/lib/mysql/mysql ]; then
   echo "[init] Initializing datadir..."
-  mariadb-install-db --user=mysql --datadir=/var/lib/mysql >/dev/null
+  mariadb-install-db --datadir=/var/lib/mysql >/dev/null
 fi
 
 # Démarre MariaDB sous l'utilisateur mysql
-exec mysqld --user=mysql --init-file=/tmp/init.sql
+exec mysqld --init-file=/tmp/init.sql

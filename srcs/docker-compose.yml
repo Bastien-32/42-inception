@@ -11,11 +11,7 @@ services:
     networks:
       - inception
     restart: unless-stopped
-    healthcheck:
-      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "--password=$MYSQL_ROOT_PASSWORD"]
-      interval: 5s
-      timeout: 3s
-      retries: 10
+
 
   wordpress:
     build:
@@ -26,17 +22,20 @@ services:
       - wp_data:/var/www/wordpress
     env_file:
       - .env
+    environment:
+      - WORDPRESS_DB_HOST=mariadb:3306
+      - WORDPRESS_DB_NAME=${MYSQL_DATABASE}
+      - WORDPRESS_DB_USER=${MYSQL_USER}
+      - WORDPRESS_DB_PASSWORD=${MYSQL_PASSWORD}
+      - WP_REDIS_HOST=${WP_REDIS_HOST}
+      - WP_REDIS_PORT=${WP_REDIS_PORT}
     depends_on:
-      mariadb:
-        condition: service_healthy
-      redis:
-        condition: service_started
+      - mariadb
+      - redis
     networks:
       - inception
     restart: unless-stopped
-    environment:
-      - WP_REDIS_HOST=redis
-      - WP_REDIS_PORT=6379
+
 
   nginx:
     build:
@@ -64,8 +63,7 @@ services:
     env_file:
       - .env
     depends_on:
-      mariadb:
-        condition: service_healthy
+      - mariadb
     ports:
       - "8080:8080"
     networks:
@@ -131,6 +129,7 @@ services:
       - portainer_data:/data
     ports:
       - "9000:9000"
+      - "9443:9443"
     networks:
       - inception
     command:
@@ -142,14 +141,27 @@ networks:
     name: inception
     driver: bridge
 
-
 volumes:
   mariadb_data:
-    external: true
     name: srcs_mariadb_data
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/badal-la/data/mariadb
+
   wp_data:
-    external: true
     name: srcs_wp_data
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/badal-la/data/wp
+
   portainer_data:
-    external: true
     name: srcs_portainer_data
+    driver: local
+    driver_opts:
+      type: none
+      o: bind
+      device: /home/badal-la/data/portainer

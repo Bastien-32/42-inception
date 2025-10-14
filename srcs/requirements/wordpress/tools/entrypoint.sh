@@ -36,6 +36,9 @@ if ! wp core is-installed --path="$DOCROOT" --allow-root >/dev/null 2>&1; then
     --admin_email="${WP_ADMIN_EMAIL}" \
     --skip-email \
     --allow-root
+  echo "[wp] Forcing HTTPS for siteurl and home..."
+  wp option update siteurl "https://${WP_DOMAIN_NAME}" --allow-root --path="$DOCROOT" || true
+  wp option update home "https://${WP_DOMAIN_NAME}" --allow-root --path="$DOCROOT" || true
 fi
 
 # 3) installer un autre Utilisateur
@@ -47,17 +50,22 @@ if ! wp user get "$WP_USER_LOGIN" --path="$DOCROOT" --allow-root >/dev/null 2>&1
 	--allow-root
 fi
 
-# 4) Plugin Redis + activation du cache
-# (Active le plugin Redis et nettoie le cache proprement)
-wp --path="$DOCROOT" plugin install redis-cache --activate --allow-root || true
-wp --path="$DOCROOT" redis enable --allow-root || true
+# 4) Redis: config constants + plugin + drop-in
+: "${WP_REDIS_HOST:=redis}"
+: "${WP_REDIS_PORT:=6379}"
 
-# Purge le cache si la commande existe (flush-cache ou cache flush)
-if wp --path="$DOCROOT" help redis 2>/dev/null | grep -q 'flush-cache'; then
-  wp --path="$DOCROOT" redis flush-cache --allow-root || true
-else
-  wp --path="$DOCROOT" cache flush --allow-root || true
-fi
+# Ecrit/maj les constantes dans wp-config.php (idempotent)
+wp --path="$DOCROOT" config set WP_REDIS_HOST "$WP_REDIS_HOST" --type=constant --allow-root
+wp --path="$DOCROOT" config set WP_REDIS_PORT "$WP_REDIS_PORT" --raw --type=constant --allow-root
+# (optionnel) forcer phpredis si présent
+wp --path="$DOCROOT" config set WP_REDIS_CLIENT "phpredis" --type=constant --allow-root || true
+
+# Plugin + drop-in
+wp --path="$DOCROOT" plugin install redis-cache --activate --allow-root || true
+wp --path="$DOCROOT" redis enable --force --allow-root || true
+
+# Purge propre
+wp --path="$DOCROOT" redis flush --allow-root || wp --path="$DOCROOT" cache flush --allow-root || true
 
 # 5) Démarrer PHP-FPM
 exec /usr/sbin/php-fpm8.2 -F
