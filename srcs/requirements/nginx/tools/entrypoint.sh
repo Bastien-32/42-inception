@@ -2,8 +2,6 @@
 set -e
 
 SSL_DIR=/etc/nginx/ssl
-TPL_IN=/etc/nginx/conf.d/default.conf.tpl
-CONF_OUT=/etc/nginx/conf.d/default.conf
 
 mkdir -p "$SSL_DIR"
 
@@ -15,11 +13,8 @@ if [ ! -f "$SSL_DIR/server.crt" ] || [ ! -f "$SSL_DIR/server.key" ]; then
     -out    "$SSL_DIR/server.crt" \
     -subj "/C=FR/ST=Occitanie/L=Perpignan/O=42/OU=42/CN=${WP_DOMAIN_NAME}" \
     -addext "subjectAltName=DNS:${WP_DOMAIN_NAME}"
-  chmod 600 "$SSL_DIR/server.key"
 fi
 
-# Render conf depuis le template
-envsubst '${WP_DOMAIN_NAME}' < "$TPL_IN" > "$CONF_OUT"
-
 nginx -t
+
 exec nginx -g 'daemon off;'

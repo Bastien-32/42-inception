@@ -1,14 +1,18 @@
 FROM debian:bookworm-slim
 
-RUN apt-get update && apt-get install -y --no-install-recommends \
-      nginx openssl gettext-base curl && \
-    rm -rf /var/lib/apt/lists/*
+ENV DEBIAN_FRONTEND=noninteractive
 
-COPY conf/nginx.conf /etc/nginx/conf.d/default.conf.tpl
+RUN apt-get update && apt-get install -y --no-install-recommends \
+      nginx \
+      openssl \
+      curl \
+ && rm -rf /var/lib/apt/lists/*
+
+COPY conf/nginx.conf /etc/nginx/conf.d/default.conf
 
 COPY tools/entrypoint.sh /entrypoint.sh
 
-RUN chmod +x /entrypoint.sh && mkdir -p /etc/nginx/ssl
+RUN chmod +x /entrypoint.sh
 
 EXPOSE 443
 
