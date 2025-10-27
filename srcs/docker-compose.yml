@@ -12,7 +12,6 @@ services:
       - inception
     restart: unless-stopped
 
-
   wordpress:
     build:
       context: ./requirements/wordpress
@@ -22,20 +21,12 @@ services:
       - wp_data:/var/www/wordpress
     env_file:
       - .env
-    environment:
-      - WORDPRESS_DB_HOST=mariadb:3306
-      - WORDPRESS_DB_NAME=${MYSQL_DATABASE}
-      - WORDPRESS_DB_USER=${MYSQL_USER}
-      - WORDPRESS_DB_PASSWORD=${MYSQL_PASSWORD}
-      - WP_REDIS_HOST=${WP_REDIS_HOST}
-      - WP_REDIS_PORT=${WP_REDIS_PORT}
     depends_on:
       - mariadb
       - redis
     networks:
       - inception
     restart: unless-stopped
-
 
   nginx:
     build:

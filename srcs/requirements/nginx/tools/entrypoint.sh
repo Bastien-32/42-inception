@@ -5,7 +5,7 @@ SSL_DIR=/etc/nginx/ssl
 
 mkdir -p "$SSL_DIR"
 
-# Cert auto-signé si absent (SAN = WP_DOMAIN_NAME)
+# Cert auto-signé si absent
 if [ ! -f "$SSL_DIR/server.crt" ] || [ ! -f "$SSL_DIR/server.key" ]; then
   echo "[nginx] Generating self-signed certificate for ${WP_DOMAIN_NAME}…"
   openssl req -x509 -nodes -days 365 -newkey rsa:2048 \

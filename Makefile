@@ -19,7 +19,7 @@ down:
 	@echo "$(YELL)🛑 Stopping $(NAME)...$(RESET)"
 	@docker compose -f $(COMPOSE_FILE) down
 
-re: down up
+re: down up-d
 
 ps:
 	@docker compose -f $(COMPOSE_FILE) ps
