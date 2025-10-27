@@ -1,16 +1,9 @@
 FROM debian:bookworm-slim
 
 WORKDIR /opt/portainer
-ARG TARGETARCH
-ENV VER=2.21.1
 
 RUN apt-get update && apt-get install -y curl ca-certificates tar && \
-    case "$TARGETARCH" in \
-      amd64) FARCH=amd64 ;; \
-      arm64) FARCH=arm64 ;; \
-      *) echo "Unsupported arch: $TARGETARCH" >&2; exit 1 ;; \
-    esac && \
-    curl -fsSL "https://github.com/portainer/portainer/releases/download/${VER}/portainer-${VER}-linux-${FARCH}.tar.gz" \
+    curl -fsSL "https://github.com/portainer/portainer/releases/download/2.21.1/portainer-2.21.1-linux-arm64.tar.gz" \
     | tar -xz -C /opt/portainer && \
     chmod +x /opt/portainer/portainer/portainer && \
     apt-get clean && rm -rf /var/lib/apt/lists/*

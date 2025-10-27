@@ -97,10 +97,6 @@ services:
     restart: unless-stopped
     env_file:
       - .env
-    environment:
-      - FTP_PASV_ADDRESS=${VM_IP}
-      - FTP_USER=${FTP_USER}
-      - FTP_PASSWORD=${FTP_PASSWORD}
     volumes:
       - wp_data:/home/${FTP_USER}/wordpress
     ports:
