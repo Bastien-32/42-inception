@@ -21,10 +21,9 @@ down:
 
 re: down up-d
 
-ps:
-	@docker compose -f $(COMPOSE_FILE) ps
+redis-stats:
+	@docker exec -it redis redis-cli info stats | \
+	awk -F: '/keyspace_hits/{h=$$2} /keyspace_misses/{m=$$2} \
+	END {t=h+m; printf("Hits: %d | Misses: %d | Efficiency: %.2f%%\n", h, m, (h/t)*100)}'
 
-logs:
-	@docker compose -f $(COMPOSE_FILE) logs -f
-
-.PHONY: up up-d down re ps logs
+.PHONY: up up-d down re status-redis

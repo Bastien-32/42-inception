@@ -2,7 +2,7 @@ services:
   mariadb:
     build:
       context: ./requirements/mariadb
-    image: mariadb_custom
+    image: mariadb
     container_name: mariadb
     volumes:
       - mariadb_data:/var/lib/mysql
@@ -15,7 +15,7 @@ services:
   wordpress:
     build:
       context: ./requirements/wordpress
-    image: wordpress_custom
+    image: wordpress
     container_name: wordpress
     volumes:
       - wp_data:/var/www/wordpress
@@ -31,7 +31,7 @@ services:
   nginx:
     build:
       context: ./requirements/nginx
-    image: nginx_custom
+    image: nginx
     container_name: nginx
     volumes:
       - wp_data:/var/www/wordpress
@@ -49,7 +49,7 @@ services:
   adminer:
     build:
       context: ./requirements/bonus/adminer
-    image: adminer_custom
+    image: adminer
     container_name: adminer
     env_file:
       - .env
@@ -65,7 +65,7 @@ services:
   static_site:
     build:
       context: ./requirements/bonus/static_site
-    image: static_site_custom
+    image: static_site
     container_name: static_site
     restart: unless-stopped
     networks:
@@ -76,7 +76,7 @@ services:
   redis:
     build:
       context: ./requirements/bonus/redis
-    image: redis_custom
+    image: redis
     container_name: redis
     restart: unless-stopped
     networks:
@@ -90,7 +90,7 @@ services:
   ftp:
     build:
       context: ./requirements/bonus/ftp
-    image: ftp_custom
+    image: ftp
     container_name: ftp
     depends_on:
       - wordpress
@@ -112,7 +112,7 @@ services:
   portainer:
     build:
       context: ./requirements/bonus/portainer
-    image: portainer_custom
+    image: portainer
     container_name: portainer
     restart: unless-stopped
     volumes:
